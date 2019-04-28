@@ -7,7 +7,7 @@ import (
 
 	. "github.com/tarantool/go-tarantool"
 	"github.com/tarantool/go-tarantool/queue"
-	"gopkg.in/vmihailenco/msgpack.v2"
+	"github.com/vmihailenco/msgpack"
 )
 
 var server = "127.0.0.1:3013"

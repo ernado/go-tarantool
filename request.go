@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"gopkg.in/vmihailenco/msgpack.v2"
+	"github.com/vmihailenco/msgpack"
 )
 
 // Future is a handle for asynchronous request

@@ -324,7 +324,7 @@ a custom packer/unpacker, but it will work slower.
 ```go
 import (
 	"github.com/tarantool/go-tarantool"
-	"gopkg.in/vmihailenco/msgpack.v2"
+	"github.com/vmihailenco/msgpack"
 )
 
 type Member struct {
@@ -506,7 +506,7 @@ func decodeTuple(d *msgpack.Decoder, v reflect.Value) error {
 ```go
 package main
 import (
-	"gopkg.in/vmihailenco/msgpack.v2"
+	"github.com/vmihailenco/msgpack"
 	"github.com/tarantool/go-tarantool"
 	"github.com/tarantool/go-tarantool/queue"
 	"time"
