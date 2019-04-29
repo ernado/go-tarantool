@@ -84,8 +84,12 @@ func (conn *Connection) loadSchema() (err error) {
 				if temp, ok := row5["temporary"]; ok {
 					space.Temporary = temp.(bool)
 				}
+			case map[string]interface{}:
+				if temp, ok := row5["temporary"]; ok {
+					space.Temporary = temp.(bool)
+				}
 			default:
-				panic("unexpected schema format (space flags)")
+				panic("unexpected schema format (space flags): " + fmt.Sprintf("%T", row5))
 			}
 		}
 		space.FieldsById = make(map[uint32]*Field)
@@ -97,14 +101,25 @@ func (conn *Connection) loadSchema() (err error) {
 				if f == nil {
 					continue
 				}
-				f := f.(map[interface{}]interface{})
 				field := new(Field)
 				field.Id = uint32(i)
-				if name, ok := f["name"]; ok && name != nil {
-					field.Name = name.(string)
-				}
-				if type1, ok := f["type"]; ok && type1 != nil {
-					field.Type = type1.(string)
+				switch f := f.(type) {
+				case map[string]interface{}:
+					if name, ok := f["name"]; ok && name != nil {
+						field.Name = name.(string)
+					}
+					if type1, ok := f["type"]; ok && type1 != nil {
+						field.Type = type1.(string)
+					}
+				case map[interface{}]interface{}:
+					if name, ok := f["name"]; ok && name != nil {
+						field.Name = name.(string)
+					}
+					if type1, ok := f["type"]; ok && type1 != nil {
+						field.Type = type1.(string)
+					}
+				default:
+					panic("unexpected f type")
 				}
 				space.FieldsById[field.Id] = field
 				if field.Name != "" {
@@ -133,6 +148,13 @@ func (conn *Connection) loadSchema() (err error) {
 			index.Unique = row[4].(uint64) > 0
 		case map[interface{}]interface{}:
 			opts := row[4].(map[interface{}]interface{})
+			var ok bool
+			if index.Unique, ok = opts["unique"].(bool); !ok {
+				/* see bug https://github.com/tarantool/tarantool/issues/2060 */
+				index.Unique = true
+			}
+		case map[string]interface{}:
+			opts := row[4].(map[string]interface{})
 			var ok bool
 			if index.Unique, ok = opts["unique"].(bool); !ok {
 				/* see bug https://github.com/tarantool/tarantool/issues/2060 */

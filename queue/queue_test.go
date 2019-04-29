@@ -227,7 +227,7 @@ func (c *customData) DecodeMsgpack(d *msgpack.Decoder) error {
 }
 
 func (c *customData) EncodeMsgpack(e *msgpack.Encoder) error {
-	if err := e.EncodeSliceLen(1); err != nil {
+	if err := e.EncodeArrayLen(1); err != nil {
 		return err
 	}
 	if err := e.EncodeString(c.customField); err != nil {

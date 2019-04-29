@@ -349,7 +349,7 @@ type Tuple2 struct {
 }
 
 func (m *Member) EncodeMsgpack(e *msgpack.Encoder) error {
-	if err := e.EncodeSliceLen(2); err != nil {
+	if err := e.EncodeArrayLen(2); err != nil {
 		return err
 	}
 	if err := e.EncodeString(m.Name); err != nil {
@@ -380,7 +380,7 @@ func (m *Member) DecodeMsgpack(d *msgpack.Decoder) error {
 }
 
 func (c *Tuple) EncodeMsgpack(e *msgpack.Encoder) error {
-	if err := e.EncodeSliceLen(3); err != nil {
+	if err := e.EncodeArrayLen(3); err != nil {
 		return err
 	}
 	if err := e.EncodeUint(c.Cid); err != nil {
@@ -389,7 +389,7 @@ func (c *Tuple) EncodeMsgpack(e *msgpack.Encoder) error {
 	if err := e.EncodeString(c.Orig); err != nil {
 		return err
 	}
-	if err := e.EncodeSliceLen(len(c.Members)); err != nil {
+	if err := e.EncodeArrayLen(len(c.Members)); err != nil {
 		return err
 	}
 	for _, m := range c.Members {

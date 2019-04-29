@@ -80,7 +80,14 @@ func (resp *Response) decodeBody() (err error) {
 			case KeyData:
 				var res interface{}
 				var ok bool
-				if res, err = d.DecodeInterface(); err != nil {
+
+				// HACK: Altering map decoding here for backward compatibility.
+				// TODO: Make a proper fix.
+				d.SetDecodeMapFunc(decodeMap)
+				res, err = d.DecodeInterface()
+				d.SetDecodeMapFunc(decodeStringMap)
+
+				if err != nil {
 					return err
 				}
 				if resp.Data, ok = res.([]interface{}); !ok {

@@ -24,7 +24,7 @@ type Tuple2 struct {
 }
 
 func (m *Member) EncodeMsgpack(e *msgpack.Encoder) error {
-	e.EncodeSliceLen(2)
+	e.EncodeArrayLen(2)
 	e.EncodeString(m.Name)
 	e.EncodeUint(m.Val)
 	return nil
@@ -49,7 +49,7 @@ func (m *Member) DecodeMsgpack(d *msgpack.Decoder) error {
 }
 
 func (c *Tuple2) EncodeMsgpack(e *msgpack.Encoder) error {
-	e.EncodeSliceLen(3)
+	e.EncodeArrayLen(3)
 	e.EncodeUint(c.Cid)
 	e.EncodeString(c.Orig)
 	e.Encode(c.Members)
