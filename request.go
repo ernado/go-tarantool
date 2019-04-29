@@ -25,27 +25,27 @@ func (conn *Connection) Ping() (resp *Response, err error) {
 }
 
 func (req *Future) fillSearch(enc *msgpack.Encoder, spaceNo, indexNo uint32, key interface{}) error {
-	enc.EncodeUint64(KeySpaceNo)
-	enc.EncodeUint64(uint64(spaceNo))
-	enc.EncodeUint64(KeyIndexNo)
-	enc.EncodeUint64(uint64(indexNo))
-	enc.EncodeUint64(KeyKey)
+	enc.EncodeUint(KeySpaceNo)
+	enc.EncodeUint(uint64(spaceNo))
+	enc.EncodeUint(KeyIndexNo)
+	enc.EncodeUint(uint64(indexNo))
+	enc.EncodeUint(KeyKey)
 	return enc.Encode(key)
 }
 
 func (req *Future) fillIterator(enc *msgpack.Encoder, offset, limit, iterator uint32) {
-	enc.EncodeUint64(KeyIterator)
-	enc.EncodeUint64(uint64(iterator))
-	enc.EncodeUint64(KeyOffset)
-	enc.EncodeUint64(uint64(offset))
-	enc.EncodeUint64(KeyLimit)
-	enc.EncodeUint64(uint64(limit))
+	enc.EncodeUint(KeyIterator)
+	enc.EncodeUint(uint64(iterator))
+	enc.EncodeUint(KeyOffset)
+	enc.EncodeUint(uint64(offset))
+	enc.EncodeUint(KeyLimit)
+	enc.EncodeUint(uint64(limit))
 }
 
 func (req *Future) fillInsert(enc *msgpack.Encoder, spaceNo uint32, tuple interface{}) error {
-	enc.EncodeUint64(KeySpaceNo)
-	enc.EncodeUint64(uint64(spaceNo))
-	enc.EncodeUint64(KeyTuple)
+	enc.EncodeUint(KeySpaceNo)
+	enc.EncodeUint(uint64(spaceNo))
+	enc.EncodeUint(KeyTuple)
 	return enc.Encode(tuple)
 }
 
@@ -281,7 +281,7 @@ func (conn *Connection) UpdateAsync(space, index interface{}, key, ops interface
 		if err := future.fillSearch(enc, spaceNo, indexNo, key); err != nil {
 			return err
 		}
-		enc.EncodeUint64(KeyTuple)
+		enc.EncodeUint(KeyTuple)
 		return enc.Encode(ops)
 	})
 }
@@ -296,13 +296,13 @@ func (conn *Connection) UpsertAsync(space interface{}, tuple interface{}, ops in
 	}
 	return future.send(conn, func(enc *msgpack.Encoder) error {
 		enc.EncodeMapLen(3)
-		enc.EncodeUint64(KeySpaceNo)
-		enc.EncodeUint64(uint64(spaceNo))
-		enc.EncodeUint64(KeyTuple)
+		enc.EncodeUint(KeySpaceNo)
+		enc.EncodeUint(uint64(spaceNo))
+		enc.EncodeUint(KeyTuple)
 		if err := enc.Encode(tuple); err != nil {
 			return err
 		}
-		enc.EncodeUint64(KeyDefTuple)
+		enc.EncodeUint(KeyDefTuple)
 		return enc.Encode(ops)
 	})
 }
@@ -313,9 +313,9 @@ func (conn *Connection) CallAsync(functionName string, args interface{}) *Future
 	future := conn.newFuture(CallRequest)
 	return future.send(conn, func(enc *msgpack.Encoder) error {
 		enc.EncodeMapLen(2)
-		enc.EncodeUint64(KeyFunctionName)
+		enc.EncodeUint(KeyFunctionName)
 		enc.EncodeString(functionName)
-		enc.EncodeUint64(KeyTuple)
+		enc.EncodeUint(KeyTuple)
 		return enc.Encode(args)
 	})
 }
@@ -327,9 +327,9 @@ func (conn *Connection) Call17Async(functionName string, args interface{}) *Futu
 	future := conn.newFuture(Call17Request)
 	return future.send(conn, func(enc *msgpack.Encoder) error {
 		enc.EncodeMapLen(2)
-		enc.EncodeUint64(KeyFunctionName)
+		enc.EncodeUint(KeyFunctionName)
 		enc.EncodeString(functionName)
-		enc.EncodeUint64(KeyTuple)
+		enc.EncodeUint(KeyTuple)
 		return enc.Encode(args)
 	})
 }
@@ -339,9 +339,9 @@ func (conn *Connection) EvalAsync(expr string, args interface{}) *Future {
 	future := conn.newFuture(EvalRequest)
 	return future.send(conn, func(enc *msgpack.Encoder) error {
 		enc.EncodeMapLen(2)
-		enc.EncodeUint64(KeyExpression)
+		enc.EncodeUint(KeyExpression)
 		enc.EncodeString(expr)
-		enc.EncodeUint64(KeyTuple)
+		enc.EncodeUint(KeyTuple)
 		return enc.Encode(args)
 	})
 }

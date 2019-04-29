@@ -26,7 +26,7 @@ type Tuple2 struct {
 func (m *Member) EncodeMsgpack(e *msgpack.Encoder) error {
 	e.EncodeArrayLen(2)
 	e.EncodeString(m.Name)
-	e.EncodeUint(m.Val)
+	e.EncodeUint(uint64(m.Val))
 	return nil
 }
 
@@ -50,7 +50,7 @@ func (m *Member) DecodeMsgpack(d *msgpack.Decoder) error {
 
 func (c *Tuple2) EncodeMsgpack(e *msgpack.Encoder) error {
 	e.EncodeArrayLen(3)
-	e.EncodeUint(c.Cid)
+	e.EncodeUint(uint64(c.Cid))
 	e.EncodeString(c.Orig)
 	e.Encode(c.Members)
 	return nil
@@ -426,7 +426,7 @@ func TestClient(t *testing.T) {
 		if len(tpl) != 3 {
 			t.Errorf("Unexpected body of Insert (tuple len)")
 		}
-		if id, ok := tpl[0].(uint64); !ok || id != 1 {
+		if ToUint32(tpl[0]) != 1 {
 			t.Errorf("Unexpected body of Insert (0)")
 		}
 		if h, ok := tpl[1].(string); !ok || h != "hello" {
@@ -459,7 +459,7 @@ func TestClient(t *testing.T) {
 		if len(tpl) != 3 {
 			t.Errorf("Unexpected body of Delete (tuple len)")
 		}
-		if id, ok := tpl[0].(uint64); !ok || id != 1 {
+		if ToUint32(tpl[0]) != 1 {
 			t.Errorf("Unexpected body of Delete (0)")
 		}
 		if h, ok := tpl[1].(string); !ok || h != "hello" {
@@ -501,7 +501,7 @@ func TestClient(t *testing.T) {
 		if len(tpl) != 3 {
 			t.Errorf("Unexpected body of Replace (tuple len)")
 		}
-		if id, ok := tpl[0].(uint64); !ok || id != 2 {
+		if ToUint32(tpl[0]) != 2 {
 			t.Errorf("Unexpected body of Replace (0)")
 		}
 		if h, ok := tpl[1].(string); !ok || h != "hi" {
@@ -526,7 +526,7 @@ func TestClient(t *testing.T) {
 		if len(tpl) != 2 {
 			t.Errorf("Unexpected body of Update (tuple len)")
 		}
-		if id, ok := tpl[0].(uint64); !ok || id != 2 {
+		if ToUint32(tpl[0]) != 2 {
 			t.Errorf("Unexpected body of Update (0)")
 		}
 		if h, ok := tpl[1].(string); !ok || h != "bye" {
@@ -572,7 +572,7 @@ func TestClient(t *testing.T) {
 	if tpl, ok := resp.Data[0].([]interface{}); !ok {
 		t.Errorf("Unexpected body of Select")
 	} else {
-		if id, ok := tpl[0].(uint64); !ok || id != 10 {
+		if ToUint32(tpl[0]) != 10 {
 			t.Errorf("Unexpected body of Select (0)")
 		}
 		if h, ok := tpl[1].(string); !ok || h != "val 10" {
@@ -664,12 +664,12 @@ func TestClient(t *testing.T) {
 
 	// Call vs Call17
 	resp, err = conn.Call("simple_incr", []interface{}{1})
-	if resp.Data[0].([]interface{})[0].(uint64) != 2 {
+	if ToUint32(resp.Data[0].([]interface{})[0]) != 2 {
 		t.Errorf("result is not {{1}} : %v", resp.Data)
 	}
 
 	resp, err = conn.Call17("simple_incr", []interface{}{1})
-	if resp.Data[0].(uint64) != 2 {
+	if ToUint32(resp.Data[0]) != 2 {
 		t.Errorf("result is not {{1}} : %v", resp.Data)
 	}
 
@@ -684,7 +684,7 @@ func TestClient(t *testing.T) {
 	if len(resp.Data) < 1 {
 		t.Errorf("Response.Data is empty after Eval")
 	}
-	val := resp.Data[0].(uint64)
+	val := ToUint32(resp.Data[0])
 	if val != 11 {
 		t.Errorf("5 + 6 == 11, but got %v", val)
 	}

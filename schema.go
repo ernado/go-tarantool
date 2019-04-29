@@ -57,6 +57,36 @@ const (
 	vindexSpId = 289
 )
 
+// ToUint32 converts v to uint32 if possible and panics otherwise.
+//
+// Works with [u]int[8,16,32,64].
+func ToUint32(v interface{}) uint32 {
+	switch id := v.(type) {
+	case uint:
+		return uint32(id)
+	case uint8:
+		return uint32(id)
+	case uint16:
+		return uint32(id)
+	case uint32:
+		return id
+	case uint64:
+		return uint32(id)
+	case int:
+		return uint32(id)
+	case int8:
+		return uint32(id)
+	case int16:
+		return uint32(id)
+	case int32:
+		return uint32(id)
+	case int64:
+		return uint32(id)
+	default:
+		panic(fmt.Errorf("bad type %T", id))
+	}
+}
+
 func (conn *Connection) loadSchema() (err error) {
 	var resp *Response
 
@@ -72,10 +102,10 @@ func (conn *Connection) loadSchema() (err error) {
 	for _, row := range resp.Data {
 		row := row.([]interface{})
 		space := new(Space)
-		space.Id = uint32(row[0].(uint64))
+		space.Id = ToUint32(row[0])
 		space.Name = row[2].(string)
 		space.Engine = row[3].(string)
-		space.FieldsCount = uint32(row[4].(uint64))
+		space.FieldsCount = ToUint32(row[4])
 		if len(row) >= 6 {
 			switch row5 := row[5].(type) {
 			case string:
@@ -140,7 +170,7 @@ func (conn *Connection) loadSchema() (err error) {
 	for _, row := range resp.Data {
 		row := row.([]interface{})
 		index := new(Index)
-		index.Id = uint32(row[1].(uint64))
+		index.Id = ToUint32(row[1])
 		index.Name = row[2].(string)
 		index.Type = row[3].(string)
 		switch row[4].(type) {
@@ -168,7 +198,7 @@ func (conn *Connection) loadSchema() (err error) {
 			cnt := int(fields)
 			for i := 0; i < cnt; i++ {
 				field := new(IndexField)
-				field.Id = uint32(row[6+i*2].(uint64))
+				field.Id = ToUint32(row[6+i*2])
 				field.Type = row[7+i*2].(string)
 				index.Fields = append(index.Fields, field)
 			}
@@ -177,10 +207,10 @@ func (conn *Connection) loadSchema() (err error) {
 				field := new(IndexField)
 				switch f := f.(type) {
 				case []interface{}:
-					field.Id = uint32(f[0].(uint64))
+					field.Id = ToUint32(f[0])
 					field.Type = f[1].(string)
 				case map[interface{}]interface{}:
-					field.Id = uint32(f["field"].(uint64))
+					field.Id = ToUint32(f["field"])
 					field.Type = f["type"].(string)
 				}
 				index.Fields = append(index.Fields, field)
@@ -188,7 +218,7 @@ func (conn *Connection) loadSchema() (err error) {
 		default:
 			panic("unexpected schema format (index fields)")
 		}
-		spaceId := uint32(row[0].(uint64))
+		spaceId := ToUint32(row[0])
 		schema.SpacesById[spaceId].IndexesById[index.Id] = index
 		schema.SpacesById[spaceId].Indexes[index.Name] = index
 	}
