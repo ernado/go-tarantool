@@ -129,7 +129,7 @@ type single struct {
 func (s *single) DecodeMsgpack(d *msgpack.Decoder) error {
 	var err error
 	var len int
-	if len, err = d.DecodeSliceLen(); err != nil {
+	if len, err = d.DecodeArrayLen(); err != nil {
 		return err
 	}
 	if s.found = len >= 1; !s.found {
