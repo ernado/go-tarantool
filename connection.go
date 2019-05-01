@@ -433,7 +433,7 @@ func (conn *Connection) writeAuthRequest(w *bufio.Writer, scramble []byte) (err 
 		requestCode: AuthRequest,
 	}
 	var packet smallWBuf
-	err = request.pack(&packet, msgpack.NewEncoder(&packet), func(enc *msgpack.Encoder) error {
+	err = request.pack(&packet, conn.newEncoder(&packet), func(enc *msgpack.Encoder) error {
 		return enc.Encode(map[uint32]interface{}{
 			KeyUserName: conn.opts.User,
 			KeyTuple:    []interface{}{string("chap-sha1"), string(scramble)},
@@ -707,6 +707,12 @@ func (conn *Connection) newFuture(requestCode int32) (fut *Future) {
 	return
 }
 
+func (conn *Connection) newEncoder(w io.Writer) *msgpack.Encoder {
+	e := newEncoder(w)
+	// TODO: Make encoder configurable.
+	return e
+}
+
 func (conn *Connection) putFuture(fut *Future, body func(*msgpack.Encoder) error) {
 	shardn := fut.requestId & (conn.opts.Concurrency - 1)
 	shard := &conn.shard[shardn]
@@ -720,7 +726,7 @@ func (conn *Connection) putFuture(fut *Future, body func(*msgpack.Encoder) error
 	firstWritten := len(shard.buf) == 0
 	if cap(shard.buf) == 0 {
 		shard.buf = make(smallWBuf, 0, 128)
-		shard.enc = msgpack.NewEncoder(&shard.buf)
+		shard.enc = conn.newEncoder(&shard.buf)
 	}
 	blen := len(shard.buf)
 	if err := fut.pack(&shard.buf, shard.enc, body); err != nil {

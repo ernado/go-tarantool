@@ -361,7 +361,7 @@ func BenchmarkClientParallelMassiveUntyped(b *testing.B) {
 	}
 	defer conn.Close()
 
-	_, err = conn.Replace(spaceNo, []interface{}{uint(1111), "hello", "world"})
+	_, err = conn.Replace(spaceNo, []interface{}{1111, "hello", "world"})
 	if err != nil {
 		b.Errorf("No connection available")
 	}
@@ -374,7 +374,7 @@ func BenchmarkClientParallelMassiveUntyped(b *testing.B) {
 				if _, ok := <-limit; !ok {
 					break
 				}
-				_, err = conn.Select(spaceNo, indexNo, 0, 1, IterEq, []interface{}{uint(1111)})
+				_, err = conn.Select(spaceNo, indexNo, 0, 1, IterEq, []interface{}{1111})
 				wg.Done()
 				if err != nil {
 					b.Errorf("No connection available")
@@ -487,7 +487,7 @@ func TestClient(t *testing.T) {
 	}
 
 	// Replace
-	resp, err = conn.Replace(spaceNo, []interface{}{uint(2), "hello", "world"})
+	resp, err = conn.Replace(spaceNo, []interface{}{2, "hello", "world"})
 	if err != nil {
 		t.Errorf("Failed to Replace: %s", err.Error())
 	}
@@ -519,7 +519,7 @@ func TestClient(t *testing.T) {
 	}
 
 	t.Run("Update", func(t *testing.T) {
-		resp, err = conn.Update(spaceNo, indexNo, []interface{}{uint(2)}, []interface{}{[]interface{}{"=", uint32(1), "bye"}, []interface{}{"#", uint32(2), uint32(1)}})
+		resp, err = conn.Update(spaceNo, indexNo, UintKey{I: 2}, []Op{{Op: "=", Field: 1, Arg: "bye"}, {Op: "#", Field: 2, Arg: 1}})
 		if err != nil {
 			t.Errorf("Failed to Update: %s", err.Error())
 		}
@@ -552,7 +552,7 @@ func TestClient(t *testing.T) {
 		if resp == nil {
 			t.Errorf("Response is nil after Upsert (insert)")
 		}
-		resp, err = conn.Upsert(spaceNo, []interface{}{uint(3), 1}, []interface{}{[]interface{}{"+", uint32(1), uint32(1)}})
+		resp, err = conn.Upsert(spaceNo, []interface{}{uint(3), 1}, []Op{{Op: "+", Field: 1, Arg: 1}})
 		if err != nil {
 			t.Errorf("Failed to Upsert (update): %s", err.Error())
 		}
@@ -617,7 +617,7 @@ func TestClient(t *testing.T) {
 
 	// Get Typed
 	var singleTpl = Tuple{}
-	err = conn.GetTyped(spaceNo, indexNo, []interface{}{uint(10)}, &singleTpl)
+	err = conn.GetTyped(spaceNo, indexNo, []interface{}{10}, &singleTpl)
 	if err != nil {
 		t.Errorf("Failed to GetTyped: %s", err.Error())
 	}
@@ -641,7 +641,7 @@ func TestClient(t *testing.T) {
 
 	// Get Typed Empty
 	var singleTpl2 Tuple
-	err = conn.GetTyped(spaceNo, indexNo, []interface{}{uint(30)}, &singleTpl2)
+	err = conn.GetTyped(spaceNo, indexNo, []interface{}{30}, &singleTpl2)
 	if err != nil {
 		t.Errorf("Failed to GetTyped: %s", err.Error())
 	}

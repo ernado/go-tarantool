@@ -1,6 +1,10 @@
 package tarantool
 
-import "github.com/vmihailenco/msgpack"
+import (
+	"io"
+
+	"github.com/vmihailenco/msgpack"
+)
 
 const mapElemsAllocLimit = 1e4
 
@@ -57,4 +61,17 @@ func decodeMap(d *msgpack.Decoder) (interface{}, error) {
 		m[mk] = mv
 	}
 	return m, nil
+}
+
+func newEncoder(w io.Writer) *msgpack.Encoder {
+	e := msgpack.NewEncoder(w)
+	// Compat encoding is necessary e.g. for correct unpacking of update
+	// operations on tarantool side.
+	//
+	// Removing this will break things in unbeknownst places.
+	e.UseCompactEncoding(true)
+	// Using JSON tags by default, because it is common to duplicate them by
+	// msgpack tags.
+	e.UseJSONTag(true)
+	return e
 }
