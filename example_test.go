@@ -2,8 +2,9 @@ package tarantool_test
 
 import (
 	"fmt"
-	"github.com/tarantool/go-tarantool"
 	"time"
+
+	"github.com/tarantool/go-tarantool"
 )
 
 type Tuple struct {
@@ -47,7 +48,7 @@ func ExampleConnection_Select() {
 		return
 	}
 	fmt.Printf("response is %#v\n", resp.Data)
-	resp, err = conn.Select("test", "primary", 0, 100, tarantool.IterEq, tarantool.IntKey{1111})
+	resp, err = conn.Select("test", "primary", 0, 100, tarantool.IterEq, []interface{}{uint(1111)})
 	if err != nil {
 		fmt.Printf("error in select is %v", err)
 		return
@@ -67,13 +68,13 @@ func ExampleConnection_SelectTyped() {
 	}
 	defer conn.Close()
 	var res []Tuple
-	err = conn.SelectTyped(512, 0, 0, 100, tarantool.IterEq, tarantool.IntKey{1111}, &res)
+	err = conn.SelectTyped(512, 0, 0, 100, tarantool.IterEq, []interface{}{uint(1111)}, &res)
 	if err != nil {
 		fmt.Printf("error in select is %v", err)
 		return
 	}
 	fmt.Printf("response is %v\n", res)
-	err = conn.SelectTyped("test", "primary", 0, 100, tarantool.IterEq, tarantool.IntKey{1111}, &res)
+	err = conn.SelectTyped("test", "primary", 0, 100, tarantool.IterEq, []interface{}{uint(1111)}, &res)
 	if err != nil {
 		fmt.Printf("error in select is %v", err)
 		return
@@ -134,13 +135,13 @@ func Example() {
 	// replace tuple with primary key 13
 	// note, Tuple is defined within tests, and has EncdodeMsgpack and DecodeMsgpack
 	// methods
-	resp, err = client.Replace(spaceNo, []interface{}{uint(13), 1})
+	resp, err = client.Replace(spaceNo, []interface{}{uint(13), uint(1)})
 	fmt.Println("Replace Error", err)
 	fmt.Println("Replace Code", resp.Code)
 	fmt.Println("Replace Data", resp.Data)
 
 	// update tuple with primary key { 13 }, incrementing second field by 3
-	resp, err = client.Update("test", "primary", tarantool.UintKey{13}, []tarantool.Op{{"+", 1, 3}})
+	resp, err = client.Update("test", "primary", []interface{}{uint(13)}, []tarantool.Op{{"+", 1, 3}})
 	// or
 	// resp, err = client.Update(spaceNo, indexNo, []interface{}{uint(13)}, []interface{}{[]interface{}{"+", 1, 3}})
 	fmt.Println("Update Error", err)
@@ -171,9 +172,9 @@ func Example() {
 	resp, err = client.Replace("test", &Tuple{Id: 12, Msg: "test", Name: "twelve"})
 
 	var futs [3]*tarantool.Future
-	futs[0] = client.SelectAsync("test", "primary", 0, 2, tarantool.IterLe, tarantool.UintKey{12})
-	futs[1] = client.SelectAsync("test", "primary", 0, 1, tarantool.IterEq, tarantool.UintKey{13})
-	futs[2] = client.SelectAsync("test", "primary", 0, 1, tarantool.IterEq, tarantool.UintKey{15})
+	futs[0] = client.SelectAsync("test", "primary", 0, 2, tarantool.IterLe, []interface{}{uint(12)})
+	futs[1] = client.SelectAsync("test", "primary", 0, 1, tarantool.IterEq, []interface{}{uint(13)})
+	futs[2] = client.SelectAsync("test", "primary", 0, 1, tarantool.IterEq, []interface{}{uint(15)})
 	var t []Tuple
 	err = futs[0].GetTyped(&t)
 	fmt.Println("Fut", 0, "Error", err)
