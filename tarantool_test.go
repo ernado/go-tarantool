@@ -406,6 +406,8 @@ func TestClient(t *testing.T) {
 		t.Errorf("conn is nil after Connect")
 		return
 	}
+	t.Logf("version %s", conn.Greeting.Version)
+
 	defer conn.Close()
 
 	// Ping
@@ -441,7 +443,6 @@ func TestClient(t *testing.T) {
 			t.Errorf("Unexpected body of Insert (1)")
 		}
 	}
-	//resp, err = conn.Insert(spaceNo, []interface{}{uint(1), "hello", "world"})
 	resp, err = conn.Insert(spaceNo, &Tuple{Id: 1, Msg: "hello", Name: "world"})
 	if tntErr, ok := err.(Error); !ok || tntErr.Code != ErrTupleFound {
 		t.Errorf("Expected ErrTupleFound but got: %v", err)
@@ -517,11 +518,8 @@ func TestClient(t *testing.T) {
 		}
 	}
 
-	// Update
 	t.Run("Update", func(t *testing.T) {
-		t.Skip("TODO: fix updates")
-		// []interface{}{[]interface{}{"=", int32(1), "bye"}, []interface{}{"#", int32(2), int32(1)}}
-		resp, err = conn.Update(spaceNo, indexNo, uint32(2), []Op{{"=", 1, "bye"}, {"#", 2, 1}})
+		resp, err = conn.Update(spaceNo, indexNo, []interface{}{uint(2)}, []interface{}{[]interface{}{"=", uint32(1), "bye"}, []interface{}{"#", uint32(2), uint32(1)}})
 		if err != nil {
 			t.Errorf("Failed to Update: %s", err.Error())
 		}
@@ -546,23 +544,22 @@ func TestClient(t *testing.T) {
 		}
 	})
 
-	// Upsert
-	if strings.Compare(conn.Greeting.Version, "Tarantool 1.6.7") >= 0 {
-		resp, err = conn.Upsert(spaceNo, []interface{}{uint(3), 1}, []interface{}{[]interface{}{"+", 1, 1}})
+	t.Run("Upsert", func(t *testing.T) {
+		resp, err = conn.Upsert(spaceNo, []interface{}{uint(3), 1}, []interface{}{[]interface{}{"+", uint32(1), uint32(1)}})
 		if err != nil {
 			t.Errorf("Failed to Upsert (insert): %s", err.Error())
 		}
 		if resp == nil {
 			t.Errorf("Response is nil after Upsert (insert)")
 		}
-		resp, err = conn.Upsert(spaceNo, []interface{}{uint(3), 1}, []interface{}{[]interface{}{"+", 1, 1}})
+		resp, err = conn.Upsert(spaceNo, []interface{}{uint(3), 1}, []interface{}{[]interface{}{"+", uint32(1), uint32(1)}})
 		if err != nil {
 			t.Errorf("Failed to Upsert (update): %s", err.Error())
 		}
 		if resp == nil {
 			t.Errorf("Response is nil after Upsert (update)")
 		}
-	}
+	})
 
 	// Select
 	for i := 10; i < 20; i++ {
@@ -936,7 +933,7 @@ func TestClientNamed(t *testing.T) {
 
 	// Upsert
 	if strings.Compare(conn.Greeting.Version, "Tarantool 1.6.7") >= 0 {
-		resp, err = conn.Upsert(spaceName, []interface{}{uint(1003), 1}, []interface{}{[]interface{}{"+", 1, 1}})
+		resp, err = conn.Upsert(spaceName, []interface{}{uint(1003), 1}, []interface{}{[]interface{}{"+", uint32(1), uint32(1)}})
 		if err != nil {
 			t.Errorf("Failed to Upsert (insert): %s", err.Error())
 		}
