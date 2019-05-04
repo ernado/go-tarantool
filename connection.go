@@ -200,6 +200,10 @@ type Opts struct {
 	Handle interface{}
 	// Logger is user specified logger used for error messages
 	Logger Logger
+	// EncoderFunc is optional parameter to configure creation of msgpack encoder.
+	EncoderFunc func(w io.Writer) *msgpack.Encoder
+	// DecoderFunc is optional parameter to configure creation of msgpack decoder.
+	DecoderFunc func(r io.Reader) *msgpack.Decoder
 }
 
 // Connect creates and configures new Connection
@@ -228,6 +232,12 @@ type Opts struct {
 // - If opts.Reconnect is non-zero, then error will be returned only if authorization// fails. But if Tarantool is not reachable, then it will attempt to reconnect later
 // and will not end attempts on authorization failures.
 func Connect(addr string, opts Opts) (conn *Connection, err error) {
+	if opts.DecoderFunc == nil {
+		opts.DecoderFunc = newDecoder
+	}
+	if opts.EncoderFunc == nil {
+		opts.EncoderFunc = newEncoder
+	}
 	conn = &Connection{
 		addr:      addr,
 		requestId: 0,
@@ -708,17 +718,9 @@ func (conn *Connection) newFuture(requestCode int32) (fut *Future) {
 	return
 }
 
-func (conn *Connection) newEncoder(w io.Writer) *msgpack.Encoder {
-	e := newEncoder(w)
-	// TODO: Make encoder configurable.
-	return e
-}
+func (conn *Connection) newEncoder(w io.Writer) *msgpack.Encoder { return conn.opts.EncoderFunc(w) }
 
-func (conn *Connection) newDecoder(r io.Reader) *msgpack.Decoder {
-	d := newDecoder(r)
-	// TODO: Make decoder configurable.
-	return d
-}
+func (conn *Connection) newDecoder(r io.Reader) *msgpack.Decoder { return conn.opts.DecoderFunc(r) }
 
 func (conn *Connection) putFuture(fut *Future, body func(*msgpack.Encoder) error) {
 	shardn := fut.requestId & (conn.opts.Concurrency - 1)
