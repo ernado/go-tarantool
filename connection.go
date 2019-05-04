@@ -133,7 +133,8 @@ type Connection struct {
 	lenbuf  [PacketLengthBytes]byte
 }
 
-var _ = Connector(&Connection{}) // check compatibility with connector interface
+// Ensuring interface implementation in compile-time.
+var _ Connector = &Connection{}
 
 type connShard struct {
 	rmut     sync.Mutex
