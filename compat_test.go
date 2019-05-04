@@ -10,8 +10,7 @@ import (
 
 func TestOpEncode(t *testing.T) {
 	buf := new(bytes.Buffer)
-	e := msgpack.NewEncoder(buf)
-	e.UseCompactEncoding(true)
+	e := newEncoder(buf)
 	op := []interface{}{[]interface{}{"=", uint32(1), "bye"}, []interface{}{"#", uint32(2), uint32(1)}}
 	if err := e.Encode(op); err != nil {
 		t.Fatal(err)
@@ -26,8 +25,7 @@ func TestOpEncode(t *testing.T) {
 		t.Error("bad length")
 	}
 	newBuf := new(bytes.Buffer)
-	e = msgpack.NewEncoder(newBuf)
-	e.UseCompactEncoding(true)
+	e = newEncoder(newBuf)
 	if err := e.Encode(decoded); err != nil {
 		t.Fatal(err)
 	}

@@ -12,6 +12,7 @@ func TestBodyDecode(t *testing.T) {
 	}
 	r := &Response{
 		buf: smallBuf{b: data},
+		dec: newDecoder,
 	}
 	if err = r.decodeBody(); err != nil {
 		t.Error(err)

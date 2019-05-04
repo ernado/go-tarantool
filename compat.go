@@ -75,3 +75,9 @@ func newEncoder(w io.Writer) *msgpack.Encoder {
 	e.UseJSONTag(true)
 	return e
 }
+
+func newDecoder(r io.Reader) *msgpack.Decoder {
+	d := msgpack.NewDecoder(r)
+	d.UseJSONTag(true)
+	return d
+}

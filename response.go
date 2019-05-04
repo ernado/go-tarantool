@@ -2,9 +2,12 @@ package tarantool
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/vmihailenco/msgpack"
 )
+
+type decoderFunc func(io.Reader) *msgpack.Decoder
 
 type Response struct {
 	RequestId uint32
@@ -13,6 +16,7 @@ type Response struct {
 	// Data contains deserialized data for untyped requests
 	Data []interface{}
 	buf  smallBuf
+	dec  decoderFunc
 }
 
 func (resp *Response) fill(b []byte) {
@@ -67,7 +71,7 @@ func (resp *Response) decodeHeader(d *msgpack.Decoder) (err error) {
 func (resp *Response) decodeBody() (err error) {
 	if resp.buf.Len() > 2 {
 		var l int
-		d := msgpack.NewDecoder(&resp.buf)
+		d := resp.dec(&resp.buf)
 		if l, err = d.DecodeMapLen(); err != nil {
 			return err
 		}
@@ -114,7 +118,7 @@ func (resp *Response) decodeBody() (err error) {
 func (resp *Response) decodeBodyTyped(res interface{}) (err error) {
 	if resp.buf.Len() > 0 {
 		var l int
-		d := msgpack.NewDecoder(&resp.buf)
+		d := resp.dec(&resp.buf)
 		if l, err = d.DecodeMapLen(); err != nil {
 			return err
 		}

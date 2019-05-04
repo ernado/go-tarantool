@@ -234,8 +234,9 @@ func Connect(addr string, opts Opts) (conn *Connection, err error) {
 		Greeting:  &Greeting{},
 		control:   make(chan struct{}),
 		opts:      opts,
-		dec:       msgpack.NewDecoder(&smallBuf{}),
 	}
+	conn.dec = conn.newDecoder(&smallBuf{})
+
 	maxprocs := uint32(runtime.GOMAXPROCS(-1))
 	if conn.opts.Concurrency == 0 || conn.opts.Concurrency > maxprocs*128 {
 		conn.opts.Concurrency = maxprocs * 4
@@ -639,7 +640,7 @@ func (conn *Connection) reader(r *bufio.Reader, c net.Conn) {
 			conn.reconnect(err, c)
 			return
 		}
-		resp := &Response{buf: smallBuf{b: respBytes}}
+		resp := &Response{buf: smallBuf{b: respBytes}, dec: conn.newDecoder}
 		err = resp.decodeHeader(conn.dec)
 		if err != nil {
 			conn.reconnect(err, c)
@@ -711,6 +712,12 @@ func (conn *Connection) newEncoder(w io.Writer) *msgpack.Encoder {
 	e := newEncoder(w)
 	// TODO: Make encoder configurable.
 	return e
+}
+
+func (conn *Connection) newDecoder(r io.Reader) *msgpack.Decoder {
+	d := newDecoder(r)
+	// TODO: Make decoder configurable.
+	return d
 }
 
 func (conn *Connection) putFuture(fut *Future, body func(*msgpack.Encoder) error) {
