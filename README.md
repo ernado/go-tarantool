@@ -47,19 +47,19 @@ download the latest tarball from [golang.org](https://golang.org/dl/) and say:
 $ sudo tar -C /usr/local -xzf go1.7.5.linux-amd64.tar.gz
 $ export PATH=$PATH:/usr/local/go/bin
 $ export GOPATH="/usr/local/go/go-tarantool"
-$ sudo chmod -R a+rwx /usr/local/go </pre>
+$ sudo chmod -R a+rwx /usr/local/go
 ```
 
 The `go-tarantool` package is in
-[tarantool/go-tarantool](github.com/tarantool/go-tarantool) repository.
+[tarantool/go-tarantool](https://github.com/ernado/go-tarantool) repository.
 To download and install, say:
 
 ```
-$ go get github.com/tarantool/go-tarantool
+$ go get github.com/ernado/go-tarantool
 ```
 
 This should bring source and binary files into subdirectories of `/usr/local/go`,
-making it possible to access by adding `github.com/tarantool/go-tarantool` in
+making it possible to access by adding `github.com/ernado/go-tarantool` in
 the `import {...}` section at the start of any Go program.
 
 <h2>Hello World</h2>
@@ -81,9 +81,9 @@ of terms like "connect", "space", "index", and the requests for creating and
 manipulating database objects or Lua functions.
 
 The source files for the requests library are:
-* [connection.go](https://github.com/tarantool/go-tarantool/blob/master/connection.go)
+* [connection.go](https://github.com/ernado/go-tarantool/blob/master/connection.go)
   for the `Connect()` function plus functions related to connecting, and
-* [request.go](https://github.com/tarantool/go-tarantool/blob/master/request.go)
+* [request.go](https://github.com/ernado/go-tarantool/blob/master/request.go)
   for data-manipulation functions and Lua invocations.
 
 See comments in those files for syntax details:
@@ -106,7 +106,7 @@ Tarantool manual. There are also Typed and Async versions of each data-manipulat
 function.
 
 The source file for error-handling tools is
-[errors.go](https://github.com/tarantool/go-tarantool/blob/master/errors.go),
+[errors.go](https://github.com/ernado/go-tarantool/blob/master/errors.go),
 which has structure definitions and constants whose names are equivalent to names
 of errors that the Tarantool server returns.
 
@@ -120,7 +120,8 @@ package main
 
 import (
      "fmt"
-     "github.com/tarantool/go-tarantool"
+     
+     "github.com/ernado/go-tarantool"
 )
 
 func main() {
@@ -138,7 +139,7 @@ func main() {
 }
 ```
 
-**Observation 1:** the line "`github.com/tarantool/go-tarantool`" in the
+**Observation 1:** the line "`github.com/ernado/go-tarantool`" in the
 `import(...)` section brings in all Tarantool-related functions and structures.
 
 **Observation 2:** the line beginning with "`Opts :=`" sets up the options for
@@ -169,7 +170,7 @@ There are two parameters:
 ## Help
 
 To contact `go-tarantool` developers on any problems, create an issue at
-[tarantool/go-tarantool](http://github.com/tarantool/go-tarantool/issues).
+[tarantool/go-tarantool](http://github.com/ernado/go-tarantool/issues).
 
 The developers of the [Tarantool server](http://github.com/tarantool/tarantool)
 will also be happy to provide advice or receive feedback.
@@ -180,9 +181,10 @@ will also be happy to provide advice or receive feedback.
 package main
 
 import (
-	"github.com/tarantool/go-tarantool"
 	"log"
 	"time"
+	
+	"github.com/ernado/go-tarantool"
 )
 
 func main() {
@@ -326,7 +328,7 @@ a custom packer/unpacker, but it will work slower.
 
 ```go
 import (
-	"github.com/tarantool/go-tarantool"
+	"github.com/ernado/go-tarantool"
 	"github.com/vmihailenco/msgpack"
 )
 
@@ -508,108 +510,110 @@ func decodeTuple(d *msgpack.Decoder, v reflect.Value) error {
 ## Working with queue
 ```go
 package main
+
 import (
-	"github.com/vmihailenco/msgpack"
-	"github.com/tarantool/go-tarantool"
-	"github.com/tarantool/go-tarantool/queue"
-	"time"
-	"fmt"
-	"log"
+    "fmt"
+    "log"
+    "time"
+
+    "github.com/ernado/go-tarantool"
+    "github.com/ernado/go-tarantool/queue"
+    "github.com/vmihailenco/msgpack"
 )
 
 type customData struct{
-	Dummy bool
+    Dummy bool
 }
 
 func (c *customData) DecodeMsgpack(d *msgpack.Decoder) error {
-	var err error
-	if c.Dummy, err = d.DecodeBool(); err != nil {
-		return err
-	}
-	return nil
+    var err error
+    if c.Dummy, err = d.DecodeBool(); err != nil {
+        return err
+    }
+    return nil
 }
 
 func (c *customData) EncodeMsgpack(e *msgpack.Encoder) error {
-	return e.EncodeBool(c.Dummy)
+    return e.EncodeBool(c.Dummy)
 }
 
 func main() {
-	opts := tarantool.Opts{
-		Timeout: time.Second,
-		Reconnect: time.Second,
-		MaxReconnects: 5,
-		User: "user",
-		Pass: "pass",
-		// ...
-	}
-	conn, err := tarantool.Connect("127.0.0.1:3301", opts)
+    opts := tarantool.Opts{
+        Timeout: time.Second,
+        Reconnect: time.Second,
+        MaxReconnects: 5,
+        User: "user",
+        Pass: "pass",
+        // ...
+    }
+    conn, err := tarantool.Connect("127.0.0.1:3301", opts)
 
-	if err != nil {
-		log.Fatalf("connection: %s", err)
-		return
-	}
+    if err != nil {
+        log.Fatalf("connection: %s", err)
+        return
+    }
 
-	cfg := queue.Cfg{
-		Temporary:  true,
-		IfNotExists: true,
-		Kind:       queue.FIFO,
-		Opts: queue.Opts{
-			Ttl:   10 * time.Second,
-			Ttr:   5 * time.Second,
-			Delay: 3 * time.Second,
-			Pri:   1,
-		},
-	}
+    cfg := queue.Cfg{
+        Temporary:  true,
+        IfNotExists: true,
+        Kind:       queue.FIFO,
+        Opts: queue.Opts{
+            Ttl:   10 * time.Second,
+            Ttr:   5 * time.Second,
+            Delay: 3 * time.Second,
+            Pri:   1,
+        },
+    }
 
-	que := queue.New(conn, "test_queue")
-	if err = que.Create(cfg); err != nil {
-		log.Fatalf("queue create: %s", err)
-		return
-	}
+    que := queue.New(conn, "test_queue")
+    if err = que.Create(cfg); err != nil {
+        log.Fatalf("queue create: %s", err)
+        return
+    }
 
-	// put data
-	task, err := que.Put("test_data")
-	if err != nil {
-		log.Fatalf("put task: %s", err)
-	}
-	fmt.Println("Task id is", task.Id())
+    // put data
+    task, err := que.Put("test_data")
+    if err != nil {
+        log.Fatalf("put task: %s", err)
+    }
+    fmt.Println("Task id is", task.Id())
 
-	// take data
-	task, err = que.Take() //blocking operation
-	if err != nil {
-		log.Fatalf("take task: %s", err)
-	}
-	fmt.Println("Data is", task.Data())
-	task.Ack()
+    // take data
+    task, err = que.Take() //blocking operation
+    if err != nil {
+        log.Fatalf("take task: %s", err)
+    }
+    fmt.Println("Data is", task.Data())
+    task.Ack()
 
-	// take typed example
-	putData := customData{}
-	// put data
-	task, err = que.Put(&putData)
-	if err != nil {
-		log.Fatalf("put typed task: %s", err)
-	}
-	fmt.Println("Task id is ", task.Id())
+    // take typed example
+    putData := customData{}
+    // put data
+    task, err = que.Put(&putData)
+    if err != nil {
+        log.Fatalf("put typed task: %s", err)
+    }
+    fmt.Println("Task id is ", task.Id())
 
-	takeData := customData{}
-	//take data
-	task, err = que.TakeTyped(&takeData) //blocking operation
-	if err != nil {
-		log.Fatalf("take take typed: %s", err)
-	}
-	fmt.Println("Data is ", takeData)
-	// same data
-	fmt.Println("Data is ", task.Data())
+    takeData := customData{}
+    //take data
+    task, err = que.TakeTyped(&takeData) //blocking operation
+    if err != nil {
+        log.Fatalf("take take typed: %s", err)
+    }
+    fmt.Println("Data is ", takeData)
+    // same data
+    fmt.Println("Data is ", task.Data())
 
-	task, err = que.Put([]int{1, 2, 3})
-	task.Bury()
+    task, err = que.Put([]int{1, 2, 3})
+    task.Bury()
 
-	task, err = que.TakeTimeout(2 * time.Second)
-	if task == nil {
-		fmt.Println("Task is nil")
-	}
+    task, err = que.TakeTimeout(2 * time.Second)
+    if task == nil {
+        fmt.Println("Task is nil")
+    }
 
-	que.Drop()
+    que.Drop()
 }
 ```
 Features of the implementation:

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/tarantool/go-tarantool"
+	. "github.com/ernado/go-tarantool"
 	"github.com/vmihailenco/msgpack"
 )
 

@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/tarantool/go-tarantool"
-	"github.com/tarantool/go-tarantool/queue"
+	. "github.com/ernado/go-tarantool"
+	"github.com/ernado/go-tarantool/queue"
 	"github.com/vmihailenco/msgpack"
 )
 

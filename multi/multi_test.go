@@ -4,15 +4,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tarantool/go-tarantool"
+	"github.com/ernado/go-tarantool"
 )
 
 var server1 = "127.0.0.1:3013"
 var server2 = "127.0.0.1:3014"
 var connOpts = tarantool.Opts{
-	Timeout: 	500 * time.Millisecond,
-	User:    	"test",
-	Pass:    	"test",
+	Timeout: 500 * time.Millisecond,
+	User:    "test",
+	Pass:    "test",
 }
 
 func TestConnError_IncorrectParams(t *testing.T) {
@@ -169,4 +169,3 @@ func TestClose(t *testing.T) {
 		t.Errorf("incorrect server2 conn status after close")
 	}
 }
-

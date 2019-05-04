@@ -2,21 +2,22 @@ package multi
 
 import (
 	"errors"
-	"github.com/tarantool/go-tarantool"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/ernado/go-tarantool"
 )
 
 const (
-	connConnected  = iota
+	connConnected = iota
 	connClosed
 )
 
 var (
-	ErrEmptyAddrs = errors.New("addrs should not be empty")
+	ErrEmptyAddrs        = errors.New("addrs should not be empty")
 	ErrWrongCheckTimeout = errors.New("wrong check timeout, must be greater than 0")
-	ErrNoConnection = errors.New("no active connections")
+	ErrNoConnection      = errors.New("no active connections")
 )
 
 type ConnectionMulti struct {
@@ -46,15 +47,15 @@ func ConnectWithOpts(addrs []string, connOpts tarantool.Opts, opts OptsMulti) (c
 		return nil, ErrWrongCheckTimeout
 	}
 
-	notify := make(chan tarantool.ConnEvent, 10 * len(addrs)) // x10 to accept disconnected and closed event (with a margin)
+	notify := make(chan tarantool.ConnEvent, 10*len(addrs)) // x10 to accept disconnected and closed event (with a margin)
 	connOpts.Notify = notify
 	connMulti = &ConnectionMulti{
-		addrs:    	addrs,
-		connOpts: 	connOpts,
-		opts:     	opts,
-		notify:   	notify,
-		control:  	make(chan struct{}),
-		pool:		make(map[string]*tarantool.Connection),
+		addrs:    addrs,
+		connOpts: connOpts,
+		opts:     opts,
+		notify:   notify,
+		control:  make(chan struct{}),
+		pool:     make(map[string]*tarantool.Connection),
 	}
 	somebodyAlive, _ := connMulti.warmUp()
 	if !somebodyAlive {
