@@ -112,7 +112,6 @@ func (d defaultLogger) Report(event ConnLogKind, conn *Connection, v ...interfac
 // always returns array of array (array of tuples for space related methods).
 // For Eval* and Call17* tarantool always returns array, but does not forces
 // array of arrays.
-
 type Connection struct {
 	addr  string
 	c     net.Conn
@@ -172,13 +171,13 @@ type Opts struct {
 	User string
 	// Pass is password for authorization
 	Pass string
-	// RateLimit limits number of 'in-fly' request, ie aready putted into
-	// requests queue, but not yet answered by server or timeouted.
+	// RateLimit limits number of 'in-fly' request, ie already putted into
+	// requests queue, but not yet answered by server or time-outed.
 	// It is disabled by default.
 	// See RLimitAction for possible actions when RateLimit.reached.
 	RateLimit uint
 	// RLimitAction tells what to do when RateLimit reached:
-	//   RLimitDrop - immediatly abort request,
+	//   RLimitDrop - immediately abort request,
 	//   RLimitWait - wait during timeout period for some request to be answered.
 	//                If no request answered during timeout period, this request
 	//                is aborted.
@@ -196,7 +195,7 @@ type Opts struct {
 	// Notify is a channel which receives notifications about Connection status
 	// changes.
 	Notify chan<- ConnEvent
-	// Handle is user specified value, that could be retrivied with Handle() method
+	// Handle is user specified value, that could be retrieved with Handle() method
 	Handle interface{}
 	// Logger is user specified logger used for error messages
 	Logger Logger
