@@ -13,4 +13,4 @@ before_install:
   - ./docker-start.sh
 
 script:
-  - go test -race -v .
+  - ./go.test.sh
