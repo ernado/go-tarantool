@@ -7,6 +7,9 @@
 
 # Client in Go for Tarantool 1.6+
 
+[![Build Status](https://travis-ci.com/ernado/go-tarantool.svg?branch=master)](https://travis-ci.com/ernado/go-tarantool)
+[![GoDoc](https://godoc.org/github.com/ernado/go-tarantool?status.svg)](https://godoc.org/github.com/ernado/go-tarantool)
+
 The `go-tarantool` package has everything necessary for interfacing with
 [Tarantool 1.6+](http://tarantool.org/).
 
