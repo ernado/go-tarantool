@@ -640,7 +640,7 @@ func (conn *Connection) reader(r *bufio.Reader, c net.Conn) {
 			conn.reconnect(err, c)
 			return
 		}
-		resp := &Response{buf: smallBuf{b: respBytes}, dec: conn.newDecoder}
+		resp := &Response{buf: smallBuf{b: respBytes}, newDecoder: conn.newDecoder}
 		err = resp.decodeHeader(conn.dec)
 		if err != nil {
 			conn.reconnect(err, c)
